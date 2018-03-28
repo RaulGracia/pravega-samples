@@ -2,13 +2,7 @@
 
 The application reads apache access log from a Pravega stream and once every 2 seconds
 counts the number of 500 responses in the last 30 seconds, and generates
-alert when the counts of 5000 responses exceed 6.
-
-The scripts can be found under the flink-examples directory in:
-```
-flink-examples/build/install/pravega-flink-examples/bin
-```
-
+alert when the counts of 500 responses exceed 6.
 
 ## Prerequistes ##
 
@@ -24,8 +18,8 @@ $ bin/highCountAlerter [--controller tcp://127.0.0.1:9090] [--stream myscope/apa
 
 ## Start Logstash with Pravega Output Plugin ##
 Copy the contents under flink-examples/doc/flink-high-error-count-alert/filters/ to the host
-where logstash is installed, e.g., in the directory of ~/pravega.
-update **pravega_endpoint** in ~/pravega/90-pravega-output.conf.
+where logstash is installed, e.g., in directory ~/pravega.
+update **pravega_endpoint** in ~/pravega/90-pravega-output.conf
 
 ```
 output {
@@ -37,10 +31,9 @@ output {
 }
 ```
 
-Start logstash on the host where logstash is installed, assuming it is installed at /usr/share/logstash/bin.
-It will take input from console and push the data to Pravega.
+Start logstash, assuming it is installed at /usr/share/logstash/bin.
 Note that sometimes it may take a minute or two for logstash to start. For troubleshooting, the logstash log files are 
-normally at /var/log/logstash. To restart, type Ctrl-C, and re-run the command.
+normally at /var/log/logstash. To restart, type Ctrl-C, then re-run the command.
 
 ```
 $ sudo /usr/share/logstash/bin -f ~/pravega
@@ -55,7 +48,8 @@ In the logstash window, paste apache access logs like the followings:
 10.1.1.11 - peter [19/Mar/2018:02:24:01 -0400] "GET /health/ HTTP/1.1" 200 182 "http://example.com/myapp" "Mozilla/5.0"
 10.1.1.11 - peter [19/Mar/2018:02:24:01 -0400] "PUT /mapping/ HTTP/1.1" 500 182 "http://example.com/myapp" "python-client"
 ```
-Logstash will push them to Pravega as well as print on the console, per the configuration in ~/pravega.
+
+Logstash will push them to Pravega as well as print on the console per the configuration in ~/pravega.
 ```
 {
         "request" => "/health/",
@@ -91,7 +85,7 @@ Logstash will push them to Pravega as well as print on the console, per the conf
 }
 ```
 
-In the HighCountAlerter window, you should see output like the following. Once the 500 response counts is 6 or above, it
+In the HighCountAlerter window, you should see output like the following. Once the 500 response counts reach 6 or above, it
 should print **High 500 responses** alerts.
 ```
 3> Response count: 200 : 1
@@ -119,3 +113,10 @@ should print **High 500 responses** alerts.
 3> Response count: 200 : 1
 3> Response count: 500 : 1
 ```
+
+## Flink References ##
+Some Flink references for datastream transformation, event time windows, and complex event processing (CEP):
+* Flink DataStream transformations: https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/datastream_api.html#datastream-transformations
+* Flink Event Time Processing and Watermrks: http://vishnuviswanath.com/flink_eventtime.html
+* Flink CEP blog: http://flink.apache.org/news/2016/04/06/cep-monitoring.html
+* Flink CEP API: https://ci.apache.org/projects/flink/flink-docs-master/dev/libs/cep.html
