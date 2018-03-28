@@ -1,13 +1,13 @@
-# High Error Count Alert
+# High Count Alert #
 
-The application reads apache access log from a Pravega stream and once every 2 seconds
+The application reads apache access logs from a Pravega stream and once every 2 seconds
 counts the number of 500 responses in the last 30 seconds, and generates
 alert when the counts of 500 responses exceed 6.
 
 ## Prerequistes ##
 
-1. Logstash installed (see [Install logstash](https://www.elastic.co/guide/en/logstash/5.6/installing-logstash.html)
-2. Pravega running (see [here](http://pravega.io/docs/latest/getting-started/) for instructions).
+1. Logstash installed, see [Install logstash](https://www.elastic.co/guide/en/logstash/5.6/installing-logstash.html).
+2. Pravega running, see [here](http://pravega.io/docs/latest/getting-started/) for instructions.
 
 ## Run HighCountAlerter ##
 
@@ -115,7 +115,7 @@ should print **High 500 responses** alerts.
 ```
 
 ## Flink References ##
-Some Flink references for datastream transformation, event time windows, and complex event processing (CEP):
+A few Flink references for datastream transformation, event time windows, and complex event processing (CEP):
 * Flink DataStream transformations: https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/datastream_api.html#datastream-transformations
 * Flink Event Time Processing and Watermrks: http://vishnuviswanath.com/flink_eventtime.html
 * Flink CEP blog: http://flink.apache.org/news/2016/04/06/cep-monitoring.html
