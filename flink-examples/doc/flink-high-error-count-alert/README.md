@@ -4,6 +4,9 @@ The application reads apache access logs from a Pravega stream and once every 2 
 counts the number of 500 responses in the last 30 seconds, and generates
 alert when the counts of 500 responses exceed 6.
 
+Note that you don't need Logstash to demonstrate this sample. Instead, use the WordCountWriter sample to push
+apache logs as json strings to Pravega. See details below.
+
 ## Prerequistes ##
 
 1. Logstash installed, see [Install logstash](https://www.elastic.co/guide/en/logstash/5.6/installing-logstash.html).
@@ -41,7 +44,7 @@ Sending Logstash's logs to /var/log/logstash which is now configured via log4j2.
 The stdin plugin is now waiting for input:
 ```
 
-## Generate Alert ##
+## Input Data via Logstash ##
 
 In the logstash window, paste apache access logs like the followings:
 ```
@@ -85,6 +88,21 @@ Logstash will push them to Pravega as well as print on the console per the confi
 }
 ```
 
+## Input Data via WordCountWriter ##
+In case you don't to need to use logstash, you can use netcat and [wordCountWriter](../flink-wordcount/README.md) to push json strings to Pravega. 
+
+In one window, start netcat
+```
+$ nc -lk 9999
+{"request":"/mapping/","agent":"\"python-client\"","auth":"peter","ident":"-","verb":"PUT","message":"10.1.1.11 - peter [19/Mar/2018:02:24:01 -0400] \"PUT /mapping/ HTTP/1.1\" 500 182 \"http://example.com/myapp\" \"python-client\"","referrer":"\"http://example.com/myapp\"","@timestamp":"2018-03-19T06:24:01.000Z","response":"500","bytes":"182","clientip":"10.1.1.11","@version":"1","host":"lglca061.lss.emc.com","httpversion":"1.1"}
+```
+
+In another window, start wordCountWriter
+```
+./bin/wordCountWriter --host localhost --port 9999 --stream myscope/apacheaccess
+```
+
+## View Alert ##
 In the HighCountAlerter window, you should see output like the following. Once the 500 response counts reach 6 or above, it
 should print **High 500 responses** alerts.
 ```
