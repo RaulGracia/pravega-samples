@@ -13,7 +13,7 @@ flink-examples/build/install/pravega-flink-examples/bin
 ## Prerequistes ##
 
 1. Logstash installed (see [Install logstash](https://www.elastic.co/guide/en/logstash/5.6/installing-logstash.html)
-2. Pravega running (see [here](http://pravega.io/docs/latest/getting-started/) for instructions). The easiest is to download and run from the pre-built binaries.
+2. Pravega running (see [here](http://pravega.io/docs/latest/getting-started/) for instructions).
 
 ## Run HighCountAlerter ##
 
