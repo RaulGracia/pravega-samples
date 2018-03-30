@@ -4,13 +4,13 @@ The application reads apache access logs from a Pravega stream and once every 2 
 counts the number of 500 responses in the last 30 seconds, and generates
 alert when the counts of 500 responses exceed 6.
 
-Note that you don't need Logstash to demonstrate this sample. Instead, use the WordCountWriter sample to push
-apache logs as json strings to Pravega. See details below.
-
 ## Prerequistes ##
 
 1. Logstash installed, see [Install logstash](https://www.elastic.co/guide/en/logstash/5.6/installing-logstash.html).
 2. Pravega running, see [here](http://pravega.io/docs/latest/getting-started/) for instructions.
+
+Note that you can also skip logstash to demonstrate this sample. Instead, use the WordCountWriter sample to push
+apache access logs as json strings to Pravega. See details below.
 
 ## Run HighCountAlerter ##
 
