@@ -1,0 +1,7 @@
+[submodule "lib/flink-connectors"]
+	path = lib/flink-connectors
+	url = https://github.com/pravega/flink-connectors.git
+[submodule "lib/pravega"]
+	path = lib/pravega
+	url = https://github.com/pravega/pravega.git
+	branch = master

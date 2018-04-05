@@ -39,6 +39,10 @@ subprojects {
     plugins.withType(org.gradle.api.plugins.JavaPlugin) {
         group "io.pravega"
         version samplesVersion
+        
+        afterEvaluate {
+            tasks['compileJava'].dependsOn installPravega, installFlinkConnectors
+        }        
     }
 
     remotes {
@@ -58,3 +62,15 @@ subprojects {
         }
     }
 }
+
+task installPravega(type: GradleBuild) {
+    dir = "lib/pravega"
+    tasks = ["install", ":standalone:installDist"]
+}
+installPravega.onlyIf { pravegaVersion.endsWith("-SNAPSHOT") }
+
+task installFlinkConnectors(type: GradleBuild) {
+    dir = "lib/flink-connectors"
+    tasks = ["install"]
+}
+installFlinkConnectors.onlyIf { connectorVersion.endsWith("-SNAPSHOT") }
