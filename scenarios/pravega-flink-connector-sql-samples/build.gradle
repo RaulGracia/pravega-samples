@@ -23,6 +23,7 @@ sourceCompatibility = "1.8"
 archivesBaseName = 'pravega-flink-connector-sql-samples'
 
 dependencies {
+<<<<<<< HEAD
     compile "io.pravega:pravega-client:${pravegaVersion}"
     compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
 
@@ -32,6 +33,12 @@ dependencies {
     compile "org.apache.flink:flink-table-api-java-bridge_${flinkScalaVersion}:${flinkVersion}"
     compile "org.apache.flink:flink-streaming-scala_${flinkScalaVersion}:${flinkVersion}"
 
+=======
+    compile "io.pravega:pravega-connectors-flink_$flinkScalaVersion:${flinkConnectorVersion}"
+    compile "org.apache.flink:flink-streaming-java_$flinkScalaVersion:${flinkVersion}"
+    compile "org.apache.flink:flink-table_$flinkScalaVersion:${flinkVersion}"
+    compile "org.apache.flink:flink-streaming-scala_$flinkScalaVersion:${flinkVersion}"
+>>>>>>> parent of 22283c2... Integrate pravega-keycloak-client (#220)
     compile "ch.qos.logback:logback-classic:1.1.7"
     compile "com.fasterxml.jackson.core:jackson-databind:2.8.9"
 
@@ -69,7 +76,11 @@ distributions {
 
 shadowJar {
     dependencies {
+<<<<<<< HEAD
         include dependency("io.pravega:pravega-connectors-flink_${flinkScalaVersion}")
         include dependency("io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}")
+=======
+        include dependency("io.pravega:pravega-connectors-flink_$flinkScalaVersion")
+>>>>>>> parent of 22283c2... Integrate pravega-keycloak-client (#220)
     }
 }
