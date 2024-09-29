@@ -102,6 +102,14 @@ task scriptSharedConfigCli(type: CreateStartScripts) {
     classpath = files(jar.archivePath) + sourceSets.main.runtimeClasspath
 }
 
+task scriptStateSynchronizerBenchmark(type: CreateStartScripts) {
+    outputDir = file('build/scripts')
+    mainClassName = 'io.pravega.example.statesynchronizer.StateSynchronizerBenchmark'
+    applicationName = 'stateSynchronizerBenchmark'
+    defaultJvmOpts = ["-Dlogback.configurationFile=file:conf/logback.xml"]
+    classpath = files(jar.archivePath) + sourceSets.main.runtimeClasspath
+}
+
 task scriptNoopReader(type: CreateStartScripts) {
     outputDir = file('build/scripts')
     mainClassName = 'io.pravega.example.noop.NoopReader'
@@ -216,6 +224,7 @@ distributions {
                 from project.scriptConsoleWriter
                 from project.scriptConsoleReader
                 from project.scriptSharedConfigCli
+                from project.scriptStateSynchronizerBenchmark
                 from project.scriptNoopReader
                 from project.scriptStreamCutsCli
                 from project.scriptChatClientCli
