@@ -102,6 +102,7 @@ public class StateSynchronizerBenchmark {
                             try {
                                 // Get the current value for the counter and log the time.
                                 long startTime = System.nanoTime();
+                                config.synchronize();
                                 int currentValue = Integer.valueOf(config.getProperty(key));
                                 long endTime = System.nanoTime();
                                 long latency = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
