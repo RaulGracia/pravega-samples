@@ -7,7 +7,8 @@ import io.pravega.client.admin.StreamManager;
 import org.apache.commons.cli.*;
 
 import java.net.URI;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -70,8 +71,12 @@ public class StateSynchronizerBenchmark {
         // Create executors and thread conflict counters.
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         AtomicInteger[] threadConflicts = new AtomicInteger[numThreads]; // Per-thread conflict tracking
+        Map<Integer, List<Long>> writeLatencyMap = new ConcurrentHashMap<>();
+        Map<Integer, List<Long>> readLatencyMap = new ConcurrentHashMap<>();
         for (int i = 0; i < numThreads; i++) {
             threadConflicts[i] = new AtomicInteger(0);
+            writeLatencyMap.put(i, new ArrayList<>(30000));
+            readLatencyMap.put(i, new ArrayList<>(30000));
         }
 
         // CSV Writers for latencies and conflicts
@@ -93,35 +98,38 @@ public class StateSynchronizerBenchmark {
                 executor.submit(() -> {
                     try {
                         // Add some initial random wait to the start of process execution
-                        int iniWait = new Random().nextInt(500);
+                        int iniWait = new Random().nextInt(1000);
                         System.err.println(Thread.currentThread() + " waiting before start for " + iniWait);
                         TimeUnit.MILLISECONDS.sleep(iniWait);
 
                         // Run workload
                         for (int j = 0; j < updatesPerSecond * benchmarkDurationInSeconds; j++) {
-                            try {
-                                // Get the current value for the counter and log the time.
-                                long startTime = System.nanoTime();
-                                config.synchronize();
-                                int currentValue = Integer.valueOf(config.getProperty(key));
-                                long endTime = System.nanoTime();
-                                long latency = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
-                                latencyReader.write(threadId + "," + latency + "\n");
+                            long totalIOTime = System.nanoTime();
 
-                                // Perform state update conditional to the old value and log the write latency.
-                                startTime = System.nanoTime();
-                                boolean replaced = config.replaceProperty(key, String.valueOf(currentValue), String.valueOf(currentValue + 1));
-                                endTime = System.nanoTime();
-                                latency = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
-                                latencyWriter.write(threadId + "," + latency + "\n");
-                                if (!replaced) {
-                                    threadConflicts[threadId].incrementAndGet(); // Track conflicts for the thread
-                                }
-                            } catch (Exception e) {
-                                System.err.println(e);
+                            // Get the current value for the counter and log the time.
+                            long startTime = System.nanoTime();
+                            config.synchronize();
+                            int currentValue = Integer.valueOf(config.getProperty(key));
+                            long endTime = System.nanoTime();
+                            long latency = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+                            readLatencyMap.get(threadId).add(latency);
+
+                            // Perform state update conditional to the old value and log the write latency.
+                            startTime = System.nanoTime();
+                            boolean replaced = config.replaceProperty(key, String.valueOf(currentValue), String.valueOf(currentValue + 1));
+                            endTime = System.nanoTime();
+                            latency = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+                            writeLatencyMap.get(threadId).add(latency);
+                            if (!replaced) {
+                                threadConflicts[threadId].incrementAndGet(); // Track conflicts for the thread
                             }
+
                             // Sleep to match the update rate
-                            TimeUnit.MILLISECONDS.sleep(1000 / updatesPerSecond);
+                            totalIOTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - totalIOTime);
+                            long toSleep = (1000 / updatesPerSecond) - totalIOTime;
+                            if (toSleep > 0) {
+                                TimeUnit.MILLISECONDS.sleep(toSleep);
+                            }
                         }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -132,19 +140,24 @@ public class StateSynchronizerBenchmark {
             // Shutdown the executor after benchmark completion
             executor.shutdown();
             try {
-                if (!executor.awaitTermination(benchmarkDurationInSeconds, TimeUnit.SECONDS)) {
+                if (!executor.awaitTermination(10 + benchmarkDurationInSeconds, TimeUnit.SECONDS)) {
                     executor.shutdownNow();
                 }
             } catch (InterruptedException e) {
                 executor.shutdownNow();
             }
 
-            // Write the conflicts per thread into the conflict CSV file
+            // Write the statistics per thread in CSV files
             for (int i = 0; i < numThreads; i++) {
                 conflictWriter.write(i + "," + threadConflicts[i].get() + "\n");
+                for (long latency: readLatencyMap.get(i)) {
+                    latencyReader.write(i + "," + latency + "\n");
+                }
+                for (long latency: writeLatencyMap.get(i)) {
+                    latencyWriter.write(i + "," + latency + "\n");
+                }
             }
         }
-
 
         // Clean up
         clientFactory.close();
