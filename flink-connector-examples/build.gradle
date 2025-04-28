@@ -22,7 +22,7 @@ sourceCompatibility = "1.8"
 archivesBaseName = 'pravega-flink-examples'
 
 dependencies {
-    compile "de.javakaffee:kryo-serializers:${kryoSerializerVersion}"
+    compile group: 'com.esotericsoftware', name: 'kryo', version:kryoSerializerVersion
 
     compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
 
@@ -53,6 +53,13 @@ task scriptWordCountReader(type: CreateStartScripts) {
     outputDir = file('build/scripts')
     mainClassName = 'io.pravega.example.flink.wordcount.WordCountReader'
     applicationName = 'wordCountReader'
+    classpath = files(jar.archivePath) + sourceSets.main.runtimeClasspath
+}
+
+task scriptFastqRecordReaderJob(type: CreateStartScripts) {
+    outputDir = file('build/scripts')
+    mainClassName = 'io.pravega.example.flink.wordcount.FastqRecordReaderJob'
+    applicationName = 'fastqRecordReaderJob'
     classpath = files(jar.archivePath) + sourceSets.main.runtimeClasspath
 }
 
